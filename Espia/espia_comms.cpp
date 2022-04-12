@@ -65,7 +65,7 @@ WORD espia_disconnect(SOCKET * connection_socket) {
 	return 0;
 }
 
-INT espia_send(SOCKET * connection_socket, PCSTR send_buffer, int size_send_buffer) {
+INT espia_send(SOCKET * connection_socket, PSTR send_buffer, int size_send_buffer) {
 	int err;
 	if ((err = send(*connection_socket, send_buffer, size_send_buffer, 0)) == SOCKET_ERROR) {
 		Debug(printf("send failed: %d\n", WSAGetLastError());)
@@ -75,7 +75,7 @@ INT espia_send(SOCKET * connection_socket, PCSTR send_buffer, int size_send_buff
 		Debug(printf("Given message size (%d) exceeds the Maximum message size\n", size_send_buffer);)
 		return SEND_FAIL_INVALID_SIZE;
 	}
-
+	memset(send_buffer, 0, size_send_buffer);
 	return err;
 }
 

