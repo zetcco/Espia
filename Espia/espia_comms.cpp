@@ -65,9 +65,9 @@ WORD espia_disconnect(SOCKET * connection_socket) {
 	return 0;
 }
 
-INT espia_send(SOCKET * connection_socket, PSTR send_buffer, int size_send_buffer) {
+INT espia_send(SOCKET * connection_socket, PWSTR send_buffer, int size_send_buffer) {
 	int err;
-	if ((err = send(*connection_socket, send_buffer, size_send_buffer, 0)) == SOCKET_ERROR) {
+	if ((err = send(*connection_socket, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) {
 		Debug(printf("send failed: %d\n", WSAGetLastError());)
 		return SEND_FAIL;
 	}
