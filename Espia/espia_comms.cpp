@@ -66,8 +66,9 @@ WORD espia_disconnect(SOCKET * connection_socket) {
 }
 
 INT espia_send(SOCKET * connection_socket, PWSTR send_buffer, int size_send_buffer) {
+	/* Send data on the given buffer */
 	int err;
-	if ((err = send(*connection_socket, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) {
+	if ((err = send(*connection_socket, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
 		Debug(printf("send failed: %d\n", WSAGetLastError());)
 		return SEND_FAIL;
 	}
@@ -80,6 +81,7 @@ INT espia_send(SOCKET * connection_socket, PWSTR send_buffer, int size_send_buff
 }
 
 INT espia_recv(SOCKET * connection_socket, PSTR recv_buffer, int size_recv_buffer) {
+	/* Recieve data from the server */
     int err;
     if ((err = recv(*connection_socket, recv_buffer, size_recv_buffer, 0)) == SOCKET_ERROR) {
         Debug(printf("Recieve failed: %d\n", WSAGetLastError()));
