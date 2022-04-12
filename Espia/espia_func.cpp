@@ -15,3 +15,10 @@ void whoami(LPWSTR buffer, INT size_buffer) {
         wcscat(buffer, L"<failed>");
     }
 }
+
+void pwd(LPWSTR buffer, INT size_buffer) {
+    if (GetCurrentDirectoryW(size_buffer, buffer) == 0) {
+        Debug(printf("Failed to retrieve the Current working directory: %d\n", GetLastError());)
+        wcscat(buffer, L"<failed>");
+    }
+}
