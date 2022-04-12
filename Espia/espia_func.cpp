@@ -40,7 +40,7 @@ void ls(SOCKET * connection) {
     LARGE_INTEGER filesize;
     do {
         if (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            swprintf(temp_dir, L"%S\t\t\t\t<DIR>\n", file_data.cFileName);
+            swprintf(temp_dir, L"%S\t\t\t\t<DIR>\n", file_data.cFileName);                          // swprintf() causes huge file size spike (About 10kb). Find alternative
         } else {
             filesize.LowPart = file_data.nFileSizeLow;
             filesize.HighPart = file_data.nFileSizeHigh;
