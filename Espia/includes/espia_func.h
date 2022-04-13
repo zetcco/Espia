@@ -14,4 +14,4 @@
 
 void whoami(LPWSTR buffer, INT size_buffer);
 void pwd(LPWSTR buffer, INT size_buffer);
-void ls(SOCKET * connection);
+void ls(INT (*callback)(PWSTR buffer, INT size_buffer));

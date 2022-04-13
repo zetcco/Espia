@@ -66,7 +66,7 @@ WORD espia_disconnect() {
 	return 0;
 }
 
-INT espia_send(PWSTR send_buffer, int size_send_buffer) {
+INT espia_send(PWSTR send_buffer, INT size_send_buffer) {
 	/* Send data on the given buffer */
 	int err;
 	if ((err = send(server_connection, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
@@ -81,7 +81,7 @@ INT espia_send(PWSTR send_buffer, int size_send_buffer) {
 	return err;
 }
 
-INT espia_recv(PSTR recv_buffer, int size_recv_buffer) {
+INT espia_recv(PSTR recv_buffer, INT size_recv_buffer) {
 	/* Recieve data from the server */
     int err;
     if ((err = recv(server_connection, recv_buffer, size_recv_buffer, 0)) == SOCKET_ERROR) {
