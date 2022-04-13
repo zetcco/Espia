@@ -69,7 +69,7 @@ WORD espia_disconnect() {
 INT espia_send(PWSTR send_buffer, INT size_send_buffer) {
 	/* Send data on the given buffer */
 	int err;
-	if ((err = send(server_connection, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
+	if ((err = send(server_connection, (PSTR)send_buffer, size_send_buffer, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
 		Debug(printf("send failed: %d\n", WSAGetLastError());)
 		return SEND_FAIL;
 	}

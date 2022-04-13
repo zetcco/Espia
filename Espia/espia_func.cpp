@@ -60,7 +60,7 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
             swprintf(temp_dir, L"%S\t\t\t\t%ld bytes\n", file_data.cFileName, filesize.QuadPart);
         }
 
-        (*callback)(temp_dir, sizeof(file_data.cFileName));                                         // Call the callback function to handle output
+        (*callback)(temp_dir, wcslen(temp_dir)*sizeof(WCHAR));                                         // Call the callback function to handle output
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }
 
