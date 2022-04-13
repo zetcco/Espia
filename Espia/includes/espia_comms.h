@@ -12,7 +12,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-WORD espia_connect(PCSTR server_ip, PCSTR server_port, SOCKET * connection);
-WORD espia_disconnect(SOCKET * connection_socket);
-INT espia_send(SOCKET* connection_socket, PWSTR send_buffer, int size_send_buffer);
-INT espia_recv(SOCKET * connection_socket, PSTR recv_buffer, int size_recv_buffer);
+WORD espia_connect(PCSTR server_ip, PCSTR server_port);
+WORD espia_disconnect();
+INT espia_send(PWSTR send_buffer, int size_send_buffer);
+INT espia_recv(PSTR recv_buffer, int size_recv_buffer);
