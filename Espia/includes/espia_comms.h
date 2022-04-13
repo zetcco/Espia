@@ -1,20 +1,18 @@
 #pragma once
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <stdio.h>
-
 #include "espia_error.h"
 #include "espia_debug.h"
 
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#if DEBUG
+#include <stdio.h>
+#endif
 
 #pragma comment(lib, "Ws2_32.lib")
 
-WORD espia_connect(PCSTR server_ip, PCSTR server_port, SOCKET * connection);
-WORD espia_disconnect(SOCKET * connection_socket);
-INT espia_send(SOCKET* connection_socket, PCSTR send_buffer, int size_send_buffer);
-INT espia_recv(SOCKET * connection_socket, PSTR recv_buffer, int size_recv_buffer);
+WORD espia_connect(PCSTR server_ip, PCSTR server_port);
+WORD espia_disconnect();
+INT espia_send(PWSTR send_buffer, int size_send_buffer);
+INT espia_recv(PSTR recv_buffer, int size_recv_buffer);
