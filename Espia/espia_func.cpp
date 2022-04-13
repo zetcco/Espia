@@ -63,3 +63,10 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
         (*callback)(temp_dir, sizeof(file_data.cFileName));                                         // Call the callback function to handle output
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }
+
+void cd(PWSTR path, PWSTR buffer) {
+    if (SetCurrentDirectoryW(buffer) == 0) {
+        Debug(printf("Chanding directory failed: %d\n", GetLastError());)
+        swprintf(buffer, L"Chanding directory failed: %d\n", GetLastError());
+    }
+}
