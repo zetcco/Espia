@@ -64,9 +64,11 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }
 
-void cd(PWSTR path, PWSTR buffer) {
-    if (SetCurrentDirectoryW(buffer) == 0) {
-        Debug(printf("Chanding directory failed: %d\n", GetLastError());)
-        swprintf(buffer, L"Chanding directory failed: %d\n", GetLastError());
+INT cd(PSTR path, PWSTR buffer) {
+    if (SetCurrentDirectoryA(path) == 0) {
+        Debug(printf("Changing directory failed: %d\n", GetLastError());)
+        swprintf(buffer, L"Changing directory failed: %d\n", GetLastError());
+        return CD_ERROR;
     }
+    return ESPIA_OK;
 }
