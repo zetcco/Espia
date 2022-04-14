@@ -1,4 +1,4 @@
-#include "Espiawin32/includes/espia.h"
+#include "EspiaClient/includes/espia.h"
 
 #ifndef WINDOWS_H
 #define WINDOWS_H
