@@ -74,5 +74,3 @@ INT cd(PSTR path, PWSTR buffer, INT size_buffer) {
     }
     return ESPIA_OK;
 }
-
-INT download()

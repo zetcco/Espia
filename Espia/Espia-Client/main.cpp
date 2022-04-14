@@ -23,7 +23,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.23.245.223", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.24.104.247", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
