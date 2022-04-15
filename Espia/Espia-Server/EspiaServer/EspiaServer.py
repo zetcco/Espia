@@ -1,7 +1,9 @@
 from http import client
+import imp
 import socket
 import threading
 import EspiaClient
+import EspiaErrors
 class EspiaServer(threading.Thread):
     server_ip = None 
     server_port = None
@@ -36,6 +38,8 @@ class EspiaServer(threading.Thread):
             print("Failed to initialize the server : %s" % (err))
     
     def resume_client(self, index):
+        if (len(self.clients) == 0):
+            raise EspiaErrors.NoClientsConnected
         self.clients[index].resume()
     
     def list_clients(self):

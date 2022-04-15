@@ -13,8 +13,14 @@ class EspiaClient(threading.Thread):
     def run(self):
         self.pause()
         while (self.paused == False and self.closed == False):
-            command = input("%s >> " % (self.client_info[0]))
-            if (command == "exit"):
+            input_text = input("%s:%s >> " % (self.client_info[0], self.client_info[1]))
+            parameters = input_text.split(" ")
+            command = parameters[0]
+            parameters = parameters[1:]
+
+            if (command == "ls"):
+                self.connection.send("ls".encode())
+            elif (command == "exit"):
                 self.close() 
                 self.notify_controller() 
                 return

