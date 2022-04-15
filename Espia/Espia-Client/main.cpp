@@ -38,7 +38,7 @@ int main() {
         memset(cmd_buff, 0, BUFF_SIZE);
         cmd_arg = NULL;
         cmd_size = espia_recv(recv_buff, BUFF_SIZE);
-        memset(recv_buff + cmd_size - 1, 0, 1);                     // Remove the breakline char ('\n')
+        //memset(recv_buff + cmd_size - 1, 0, 1);                     // Remove the breakline char ('\n')
 
         /* Seperate the command from argument using the whitespace (' ') */
         int i = 0;

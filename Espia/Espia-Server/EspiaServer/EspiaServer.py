@@ -1,5 +1,3 @@
-from http import client
-import imp
 import socket
 import threading
 import EspiaClient

