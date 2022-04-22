@@ -53,7 +53,7 @@ class EspiaController(threading.Thread):
                 return
 
             with self.condition:
-                    self.condition.wait()
+                self.condition.wait()
 
 controller = EspiaController(8888)
 controller.start()
