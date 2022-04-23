@@ -67,8 +67,8 @@ class EspiaClient(threading.Thread):
     def recieve(self):
         while True:
             try:
-                recv_buff = self.connection.recv(1024).decode("utf8")
-                if (recv_buff[-12::2][:5] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
+                recv_buff = self.connection.recv(1024).decode("utf16")
+                if (recv_buff[-6:-1] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
                     self.final += recv_buff[0:-12]
                     with self.recv_state:
                         self.recv_state.notify()
