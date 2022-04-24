@@ -41,18 +41,30 @@ class EspiaClient(threading.Thread):
             elif (command == "wait"):
                 self.pause()
                 continue
+            elif (command == ""):
+                pass
             elif (command == "upload"):
-                f = open(parameters[0], "rb")
+                try:
+                    f = open(parameters[0], "rb")
+                except FileNotFoundError:
+                    print("File not found")
+                    continue
+
+                # Read the file, send the file name, then send the size in bytes
                 text = f.read()
                 size = len(text)
                 self.connection.send(("upload " + parameters[0]).encode("utf-16le"))
                 self.connection.send(("%s" % (size)).encode("utf-16le"))
+
+                # Wati for acknowledgement
                 with self.recv_state:
                     self.recv_state.wait()
-                self.connection.sendall(text)
+                if (self.final == "den"):
+                    print("File creation failed")
+                elif (self.final == "ack"):
+                    self.connection.sendall(text)
+
                 continue
-            elif (command == ""):
-                pass
             else:
                 msg = input_text.encode("utf-16le")
                 print(msg)
@@ -70,7 +82,7 @@ class EspiaClient(threading.Thread):
                 recv_buff = self.connection.recv(1024)
                 recv_buff = recv_buff.decode("utf-16le")
                 if (recv_buff[-6:-1] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
-                    self.final += recv_buff[0:-12]
+                    self.final += recv_buff[0:-6]
                     with self.recv_state:
                         self.recv_state.notify()
                 else:

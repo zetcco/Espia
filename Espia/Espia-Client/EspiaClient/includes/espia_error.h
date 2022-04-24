@@ -10,3 +10,4 @@
 #define SEND_FAIL_INVALID_SIZE -7
 #define RECV_FAIL -8
 #define CD_ERROR 9
+#define FILE_CREATION_FAIL 10

