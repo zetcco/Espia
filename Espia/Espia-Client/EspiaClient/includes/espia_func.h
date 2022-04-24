@@ -16,4 +16,4 @@
 void whoami(LPWSTR buffer, INT size_buffer);
 void pwd(LPWSTR buffer, INT size_buffer);
 void ls(INT (*callback)(PWSTR buffer, INT size_buffer));
-INT cd(PSTR path, PWSTR buffer, INT size_buffer);
+INT cd(PWSTR path, PWSTR buffer, INT size_buffer);

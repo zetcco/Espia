@@ -51,6 +51,11 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
     /* Iterate over files/folders */
     LARGE_INTEGER filesize;
     do {
+
+        printf("%ls\n", file_data.cFileName);
+        for(int j = 0 ; j < wcslen(file_data.cFileName) ; j++) printf("%02X ", file_data.cFileName[j]);
+        printf("\n");
+
         /* If current file/folder is a directory */
         if (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             StringCbPrintfW(temp_dir, sizeof(temp_dir), L"%s\t\t\t\t<DIR>\n", file_data.cFileName);
@@ -66,8 +71,8 @@ void ls(INT (*callback)(PWSTR buffer, INT size_buffer)) {
     } while (FindNextFileW(file_handle, &file_data) != 0);
 }
 
-INT cd(PSTR path, PWSTR buffer, INT size_buffer) {
-    if (SetCurrentDirectoryA(path) == 0) {
+INT cd(PWSTR path, PWSTR buffer, INT size_buffer) {
+    if (SetCurrentDirectoryW(path) == 0) {
         Debug(printf("Changing directory failed: %d\n", GetLastError());)
         StringCbPrintfW(buffer, size_buffer, L"Changing directory failed: %d\n", GetLastError());
         return CD_ERROR;
