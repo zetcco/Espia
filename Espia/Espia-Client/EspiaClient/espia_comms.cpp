@@ -89,6 +89,7 @@ INT espia_recv(PSTR recv_buffer, INT size_recv_buffer) {
         return RECV_FAIL;
     } else if (err == 0) {
         Debug(printf("Connection closed\n");)
+        return CONNECTION_CLOSED;
     }
     return err;
 }
