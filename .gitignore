@@ -2,9 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/Espia-vs/Espia/Espia/Debug
-/Espia-vs/Espia/Espia/Release
-/Espia-vs/Espia/Release
-/Espia-vs/Espia/Debug
-/Espia-vs/Espia/.vs/Espia/v16
-Espia/Espia-Server/EspiaServer/__pycache__
+/Espia/Espia-Server/EspiaServer/__pycache__
+/Espia/Espia-Client-vstudio/Debug
+/Espia/Espia-Client-vstudio/Release
+/Espia/Espia-Client-vstudio/.vs/Espia-Client-vstudio/v16
