@@ -10,7 +10,7 @@
 #endif
 
 #define TRY_SERVER 5
-#define SERVER_IP "172.23.215.80"
+#define SERVER_IP "172.23.219.59"
 #define BUFF_SIZE 1024
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {

