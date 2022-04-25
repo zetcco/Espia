@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Espia-vs/Espia/Espia/Debug
+/Espia-vs/Espia/Espia/Release
+/Espia-vs/Espia/Release
+/Espia-vs/Espia/Debug
+/Espia-vs/Espia/.vs/Espia/v16
